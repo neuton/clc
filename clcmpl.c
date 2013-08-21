@@ -50,10 +50,28 @@ void main(int argc, char **argv)
 				if (argv[i][2]=='C')
 					device_type_id = CPU;
 				else
+				if (argv[i][2]=='\0')
 				{
-					cl_compiler_options[i] = argv[i];
-					cl_compiler_options_count++;
+					i++;
+					if (argv[i][0]=='G')
+						device_type_id = GPU;
+					else
+					if (argv[i][0]=='C')
+						device_type_id = CPU;
 				}
+			}
+			else
+			if (argv[i][1]=='x')
+			{
+				cl_compiler_options[i] = argv[i];
+				i++;
+				cl_compiler_options[i] = argv[i];
+				cl_compiler_options_count += 2;
+			}
+			else
+			{
+				cl_compiler_options[i] = argv[i];
+				cl_compiler_options_count++;
 			}
 		}
 		else
@@ -209,24 +227,27 @@ void main(int argc, char **argv)
 	
 	char * build_options = (char *)malloc(sizeof(char)*42*cl_compiler_options_count);
 	build_options[0] = '\0';
-	for (i=j=0; i<cl_compiler_options_count; i++)
+	for (i=j=0; i<cl_compiler_options_count; i++, j++)
 	{
 		while (cl_compiler_options[j]==NULL) j++;
 		strcat (build_options, cl_compiler_options[j]);
 		strcat (build_options, " ");
 	}
 	free(cl_compiler_options); cl_compiler_options = NULL;
+	if (cl_compiler_options_count>0) printf("OpenCL> Build options: %s\n", build_options);
 	err = clBuildProgram(program, 0, NULL, (const char *)build_options, NULL, NULL);
 	free(build_options); build_options = NULL;
 	
 	size_t log_size;
 	i = clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
+	if (i!=CL_SUCCESS) check_cl_error("building program", err);
 	check_cl_error("getting program build log size", i);
 	if (log_size>2)
 	{
 		fputs("OpenCL> Build log:\n", stderr);
 		char * build_log = (char *)malloc(log_size);
 		i = clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, log_size, build_log, NULL);
+		if (i!=CL_SUCCESS) check_cl_error("building program", err);
 		check_cl_error("getting program build log", i);
 		fputs(build_log, stderr);
 		free(build_log); build_log = NULL;
