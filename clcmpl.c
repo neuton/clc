@@ -1,4 +1,5 @@
-// compiles OpenCL kernels into binaries
+/* compiles OpenCL kernels into binaries */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -74,40 +75,67 @@ void main(int argc, char **argv)
 	if (kf==NULL) { fputs("Error opening kernel source file!\n", stderr); exit(EXIT_FAILURE); }
 	
 	size_t kfs = 0, ifc;
-	char c, s[11] = "#include \"", include_filename[42];
-	int ifsize;
+	char c, b, s[11] = "#include \"", include_filename[42];
+	int ifsize = 0;
 	i = 0;
 	while ((c=fgetc(kf))!=EOF)
 	{
 		kfs++;
-		if (c==s[0])
+		if (c=='/')
 		{
-			i = 1;
-			while ((c=fgetc(kf))!=EOF)
+			if ((c=fgetc(kf))==EOF) break;
+			kfs++;
+			if (c=='/')
 			{
-				kfs++;
-				if (c!=s[i]) break;
-				i++;
-				if (i>9) break;
+				while ((c=fgetc(kf))!=EOF)
+				{
+					kfs++;
+					if (c=='\n') break;
+				}
+			}
+			else
+			if (c=='*')
+			{
+				b = 0;
+				while ((c=fgetc(kf))!=EOF)
+				{
+					kfs++;
+					if ((b=='*')&&(c=='/')) break;
+					b = c;
+				}
 			}
 		}
-		if (i==10)
+		else
 		{
-			ifc = kfs - 10;
-			ifsize = 0;
-			while ((c=fgetc(kf))!=EOF)
+			if (c==s[0])
 			{
-				kfs++;
-				if (c=='"')
+				i = 1;
+				while ((c=fgetc(kf))!=EOF)
 				{
-					include_filename[ifsize] = '\0';
-					ifsize++;
-					break;
+					kfs++;
+					if (c!=s[i]) break;
+					i++;
+					if (i>9) break;
 				}
-				include_filename[ifsize] = c;
-				ifsize++;
 			}
-			i = 0;
+			if (i==10)
+			{
+				ifc = kfs - 10;
+				ifsize = 0;
+				while ((c=fgetc(kf))!=EOF)
+				{
+					kfs++;
+					if (c=='"')
+					{
+						include_filename[ifsize] = '\0';
+						ifsize++;
+						break;
+					}
+					include_filename[ifsize] = c;
+					ifsize++;
+				}
+				i = 0;
+			}
 		}
 		if (c==EOF) break;
 	}
@@ -127,16 +155,13 @@ void main(int argc, char **argv)
 		}
 		else
 			full_include_filename[0]='\0';
-//		#ifdef _WIN32
-//		full_include_filename[i]='\\';
-//		#endif
 		strcat(full_include_filename, include_filename);
 		FILE * include_file = fopen(full_include_filename, "r");
 		if (include_file==NULL)
 		{
 			fputs("Error opening '", stderr);
 			fputs(full_include_filename, stderr);
-			fputs("'!\n", stderr);
+			fputs("' !\n", stderr);
 			exit(EXIT_FAILURE);
 		}
 		while (fgetc(include_file)!=EOF) kfs++; rewind(include_file); kfs -= ifsize+10;
@@ -146,9 +171,12 @@ void main(int argc, char **argv)
 		while ((c=fgetc(include_file))!=EOF) { program_src[i] = c; i++; }
 		while ((c=fgetc(kf))!=EOF) { program_src[i] = c; i++; }
 		fclose(include_file);
-//		FILE * newfile = fopen("newkernel.cl", "w");
-//		for (i=0; i<kfs; i++) fprintf(newfile, "%c", program_src[i]);
-//		fclose(newfile);
+		/*
+		FILE * newfile = fopen("newkernel.cl", "w");
+		if (newfile == NULL) {puts("ERROR");}
+		for (i=0; i<kfs; i++) fprintf(newfile, "%c", program_src[i]);
+		fclose(newfile);
+		*/
 	}
 	else
 	{
@@ -213,7 +241,7 @@ void main(int argc, char **argv)
 	err = clGetProgramInfo(program, CL_PROGRAM_BINARIES, sizeof(char *), &binary, NULL);
 	check_cl_error("getting binary", err);
 	
-	kf = fopen(output_filename, "w"); //free(output_filename); output_filename = NULL;	//! WTF HERE ???
+	kf = fopen(output_filename, "w"); free(output_filename); output_filename = NULL;
 	if (kf==NULL) { fputs("Error opening kernel binary file!\n", stderr); exit(EXIT_FAILURE); }
 	for (i=0; i<binary_size; i++) fputc((int)binary[i], kf); fclose(kf);
 }
