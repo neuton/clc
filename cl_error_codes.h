@@ -57,6 +57,6 @@ static void get_cl_error_string(char * string, const short int error)
 		case CL_INVALID_BUFFER_SIZE: strcpy(string, "INVALID_BUFFER_SIZE"); break;
 		case CL_INVALID_MIP_LEVEL: strcpy(string, "INVALID_MIP_LEVEL"); break;
 		case CL_INVALID_GLOBAL_WORK_SIZE: strcpy(string, "CL_INVALID_GLOBAL_WORK_SIZE"); break;
-		default: strcpy(string, "unknown error code");
+		default: strcpy(string, "UNKNOWN");
 	}
 }
