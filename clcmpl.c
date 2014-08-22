@@ -81,11 +81,6 @@ void main(int argc, char **argv)
 		fputs("Specify OpenCL source filename!\n", stderr);
 		exit(EXIT_FAILURE);
 	}
-	if (output_filename==NULL)
-	{
-		output_filename = (char *)malloc(sizeof(char)*6);
-		strcpy(output_filename, "a.out");
-	}
 	
 	FILE * kf = fopen(input_filename, "r");
 	if (kf==NULL) { fputs("Error opening kernel source file!\n", stderr); exit(EXIT_FAILURE); }
@@ -199,7 +194,7 @@ void main(int argc, char **argv)
 		program_src = (char *)malloc(kfs);
 		for (i=0; i<kfs; i++) program_src[i] = fgetc(kf);
 	}
-	free(input_filename); input_filename = NULL;
+	input_filename = NULL;
 	fclose(kf);
 	
 	int err;
@@ -255,7 +250,11 @@ void main(int argc, char **argv)
 	err = clGetProgramInfo(program, CL_PROGRAM_BINARIES, sizeof(char *), &binary, NULL);
 	check_cl_error("getting binary", err);
 	
-	kf = fopen(output_filename, "w"); free(output_filename); output_filename = NULL;
+	if (output_filename==NULL)
+		kf = fopen("a.out", "w");
+	else
+		kf = fopen(output_filename, "w");
+	output_filename = NULL;
 	if (kf==NULL) { fputs("Error opening kernel binary file!\n", stderr); exit(EXIT_FAILURE); }
 	for (i=0; i<binary_size; i++) fputc((int)binary[i], kf); fclose(kf);
 }
