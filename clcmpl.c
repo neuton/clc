@@ -160,9 +160,9 @@ void main(int argc, char **argv)
 		for (; ((j>0)&&(input_filename[j]!='\\')&&(input_filename[j]!='/')); j--);
 		if (j>0)
 		{
-			for (i=0; i<j+1; i++)
+			for (i=0; i<=j; i++)
 				full_include_filename[i] = input_filename[i];
-			full_include_filename[++i]='\0';
+			full_include_filename[i]='\0';
 		}
 		else
 			full_include_filename[0]='\0';
