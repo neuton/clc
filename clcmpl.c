@@ -22,8 +22,6 @@ static void check_cl_error(const char * message, const int error)
 	}
 }
 
-typedef enum {CPU, GPU} t_device_type_id;	// CPU=0, GPU=1
-
 void main(int argc, char **argv)
 {
 	size_t i, j;
@@ -31,7 +29,7 @@ void main(int argc, char **argv)
 	char **cl_compiler_options = (char **)malloc(argc*sizeof(char*));
 	for (i=0; i<argc; i++) cl_compiler_options[i] = NULL;
 	int cl_compiler_options_count = 0;
-	t_device_type_id device_type_id = GPU;
+	cl_device_type device_type_id = CL_DEVICE_TYPE_GPU;
 	for (i=1; i<argc;)
 	{
 		if (argv[i][0]=='-')
@@ -45,19 +43,19 @@ void main(int argc, char **argv)
 			if (argv[i][1]=='d')
 			{
 				if (argv[i][2]=='G')
-					device_type_id = GPU;
+					device_type_id = CL_DEVICE_TYPE_GPU;
 				else
 				if (argv[i][2]=='C')
-					device_type_id = CPU;
+					device_type_id = CL_DEVICE_TYPE_CPU;
 				else
 				if (argv[i][2]=='\0')
 				{
 					i++;
 					if (argv[i][0]=='G')
-						device_type_id = GPU;
+						device_type_id = CL_DEVICE_TYPE_GPU;
 					else
 					if (argv[i][0]=='C')
-						device_type_id = CPU;
+						device_type_id = CL_DEVICE_TYPE_CPU;
 				}
 			}
 			else
@@ -211,12 +209,7 @@ void main(int argc, char **argv)
 	check_cl_error("getting platform id", clGetPlatformIDs(1, &platform_id, NULL));
 	
 	cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform_id, 0 };
-	switch (device_type_id)
-	{
-		case CPU: err = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_CPU, 1, &device_id, NULL); break;
-		case GPU: err = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, &device_id, NULL);
-	}
-	check_cl_error("getting device id", err);
+	check_cl_error("getting device id", clGetDeviceIDs(platform_id, device_type_id, 1, &device_id, NULL));
 	
 	cl_context context = clCreateContext(cps, 1, &device_id, NULL, NULL, &err);
 	check_cl_error("creating context", err);
