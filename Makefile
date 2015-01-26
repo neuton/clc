@@ -1,6 +1,7 @@
-NAME = clcmpl
+EXEC = clc
 ARCH = 64
 CC = gcc
+CCFLAGS = -O
 
 ifdef AMDAPPSDKROOT
 	OCLINC = $(AMDAPPSDKROOT)/include
@@ -11,20 +12,23 @@ ifdef AMDAPPSDKROOT
 	endif
 endif
 
-CFLAGS = -O -I"$(OCLINC)" -L"$(OCLLIB)" -lOpenCL
-
 ifeq ($(OS), Windows_NT)
-	EXEC = $(NAME).exe
+	EXEC := $(EXEC).exe
 	RM = del
 else
-	EXEC = $(NAME)
 	RM = rm
 endif
 
-HEADER = cl_error_codes.h
+$(EXEC): clcmpl.o cl_error.o
+	$(CC) $^ -o $@ -L"$(OCLLIB)" -lOpenCL $(CCFLAGS)
 
-$(EXEC): $(NAME).c $(HEADER)
-	$(CC) $< -o $@ $(CFLAGS)
+clcmpl.o: clcmpl.c cl_error.h Makefile
+	$(CC) -c $< -o $@ -I"$(OCLINC)" $(CCFLAGS)
+
+cl_error.o: cl_error.c cl_error.h Makefile
+	$(CC) -c $< -o $@ -I"$(OCLINC)" $(CCFLAGS)
 
 clean:
-	$(RM) $(EXEC)
+	$(RM) clcmpl.o cl_error.o
+
+.PHONY: clean

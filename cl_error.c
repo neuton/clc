@@ -1,12 +1,16 @@
+#include "cl_error.h"
+
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else
 #include <CL/opencl.h>
 #endif
 
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
-static void get_cl_error_string(char * string, const short int error)
+extern void clGetErrorString(short int error, char * string)
 {
 	switch (error)
 	{
@@ -57,6 +61,29 @@ static void get_cl_error_string(char * string, const short int error)
 		case CL_INVALID_BUFFER_SIZE: strcpy(string, "INVALID_BUFFER_SIZE"); break;
 		case CL_INVALID_MIP_LEVEL: strcpy(string, "INVALID_MIP_LEVEL"); break;
 		case CL_INVALID_GLOBAL_WORK_SIZE: strcpy(string, "CL_INVALID_GLOBAL_WORK_SIZE"); break;
+		#ifdef CL_PLATFORM_NOT_FOUND_KHR
+		case CL_PLATFORM_NOT_FOUND_KHR: strcpy(string, "CL_PLATFORM_NOT_FOUND_KHR"); break;
+		#endif
 		default: strcpy(string, "UNKNOWN");
+	}
+}
+
+extern short int clSoftCheckError(short int error, const char * message)
+{
+	if (error != CL_SUCCESS)
+	{
+		char ers[42];
+		clGetErrorString(error, ers);
+		fprintf(stderr, "OpenCL> Error %s: code %d (%s)\n", message, error, ers);
+	}
+	return error;
+}
+
+extern void clCheckError(short int error, const char * message)
+{
+	if (clSoftCheckError(error, message) != CL_SUCCESS)
+	{
+		puts("Execution terminated.");
+		exit(EXIT_FAILURE);
 	}
 }
