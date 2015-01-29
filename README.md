@@ -1,6 +1,7 @@
 clc
 ==============
 Simple utility for compiling OpenCL kernels into binaries.
+Build under Windows(MinGW)/Linux/Mac.
 
 Usage examples:
 --------------
