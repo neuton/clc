@@ -92,7 +92,7 @@ void list()
 							if (j == n_devices - 1)
 								printf("  \\_ Device #%u: ", j);
 							else
-								printf(" |__ Device #%u: ", j);
+								printf("  |_ Device #%u: ", j);
 							if (clGetDeviceInfo(devices[j], CL_DEVICE_TYPE, sizeof(cl_device_type), &device_type, NULL))
 								printf("UNKNOWN");
 							else
