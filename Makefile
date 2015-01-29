@@ -20,7 +20,7 @@ else
 	RM = rm
 	ifeq ($(shell uname -s), Darwin)
 		ifndef AMDAPPSDKROOT
-			CC = gcc
+			CC = clang
 			LDFLAGS := $(LDFLAGS) -framework OpenCL
 		endif
 	endif
