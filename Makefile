@@ -14,9 +14,11 @@ ifdef AMDAPPSDKROOT
 endif
 
 ifeq ($(OS), Windows_NT)
+	SHELL = cmd
 	EXEC := $(EXEC).exe
 	RM = del
 else
+	SHELL = /bin/sh
 	RM = rm
 	ifeq ($(shell uname -s), Darwin)
 		ifndef AMDAPPSDKROOT
