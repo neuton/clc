@@ -28,16 +28,16 @@ else
 	endif
 endif
 
-$(EXEC): clcmpl.o cl_error.o
+$(EXEC): clc.o cl_error.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-clcmpl.o: clcmpl.c cl_error.h Makefile
+clc.o: clc.c cl_error.h Makefile
 	$(CC) -c $< -o $@ $(CCFLAGS)
 
 cl_error.o: cl_error.c cl_error.h Makefile
 	$(CC) -c $< -o $@ $(CCFLAGS)
 
 clean:
-	$(RM) $(EXEC) clcmpl.o cl_error.o
+	$(RM) $(EXEC) clc.o cl_error.o
 
 .PHONY: clean
