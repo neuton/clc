@@ -19,11 +19,15 @@ ifeq ($(OS), Windows_NT)
 	RM = del
 else
 	SHELL = /bin/sh
-	RM = rm
+	RM = rm -f
 	ifeq ($(shell uname -s), Darwin)
 		ifndef AMDAPPSDKROOT
 			CC = clang
 			LDFLAGS := $(LDFLAGS) -framework OpenCL
+		endif
+	else
+		ifndef AMDAPPSDKROOT
+			LDFLAGS := $(LDFLAGS) -L"/usr/lib/x86_64-linux-gnu" -lOpenCL
 		endif
 	endif
 endif
